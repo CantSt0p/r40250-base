@@ -1,3 +1,4 @@
-ClientVS22\DumpProto\
-ClientVS22\extern\
-ClientVS22\vs_files\
+ClientVS22\DumpProto/
+ClientVS22\.vs/
+ClientVS22\extern/
+ClientVS22\vs_files/
