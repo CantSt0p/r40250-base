@@ -11,6 +11,9 @@ const std::string g_astGradeName[] =
 	"grade_rare",
 	"grade_ancient",
 	"grade_legendary",
+#ifdef ENABLE_DSS_GRADE_MYTH
+	"grade_myth",
+#endif
 };
 
 const std::string g_astStepName[] =

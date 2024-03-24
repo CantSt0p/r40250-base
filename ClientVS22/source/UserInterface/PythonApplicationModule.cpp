@@ -1533,4 +1533,10 @@ void initapp()
 #else
 	PyModule_AddIntConstant(poModule, "ENABLE_BELT_RENEWAL", false);
 #endif
+
+#ifdef ENABLE_DSS_GRADE_MYTH
+	PyModule_AddIntConstant(poModule, "ENABLE_DSS_GRADE_MYTH", true);
+#else
+	PyModule_AddIntConstant(poModule, "ENABLE_DSS_GRADE_MYTH", false);
+#endif
 }

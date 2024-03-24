@@ -238,6 +238,10 @@ class ToolTip(ui.ThinBoard):
 	def ResizeToolTip(self):
 		self.SetSize(self.toolTipWidth, self.TOOL_TIP_HEIGHT + self.toolTipHeight)
 
+	def SetThinBoardSize(self, width, height = 12):
+		self.toolTipWidth = width 
+		self.toolTipHeight = height
+
 	def SetTitle(self, name):
 		self.AppendTextLine(name, self.TITLE_COLOR)
 

@@ -10,3 +10,4 @@
 #define __UDP_BLOCK__
 #endif
 #define ENABLE_BELT_RENEWAL
+#define ENABLE_DSS_GRADE_MYTH

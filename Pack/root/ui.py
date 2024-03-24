@@ -1103,23 +1103,37 @@ class ToggleButton(Button):
 
 		self.eventUp = None
 		self.eventDown = None
+	if app.ENABLE_DSS_GRADE_MYTH:
+		def SetToggleUpEvent(self, event, *args):
+			self.eventUp = event
+			self.eventUpArgs = args
 
-	def SetToggleUpEvent(self, event):
-		self.eventUp = event
+		def SetToggleDownEvent(self, event, *args):
+			self.eventDown = event
+			self.eventDownArgs = args
+	else:
+		def SetToggleUpEvent(self, event):
+			self.eventUp = event
 
-	def SetToggleDownEvent(self, event):
-		self.eventDown = event
+		def SetToggleDownEvent(self, event):
+			self.eventDown = event
 
 	def RegisterWindow(self, layer):
 		self.hWnd = wndMgr.RegisterToggleButton(self, layer)
 
 	def OnToggleUp(self):
 		if self.eventUp:
+			if self.eventUpArgs: #if app.ENABLE_DSS_GRADE_MYTH:
+					apply(self.eventUp, self.eventUpArgs)
+		else:
 			self.eventUp()
 
 	def OnToggleDown(self):
 		if self.eventDown:
-			self.eventDown()
+			if self.eventDownArgs: # if app.ENABLE_DSS_GRADE_MYTH:
+				apply(self.eventDown, self.eventDownArgs)
+			else:
+				self.eventDown()
 
 class DragButton(Button):
 	def __init__(self):

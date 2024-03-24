@@ -1,7 +1,8 @@
 import item
+import app
 
 # default_grade_need_count = [3, 3, 3, 3]
-default_grade_need_count = [15, 10, 5, 3]
+default_grade_need_count = [2, 2, 2, 2]
 default_grade_fee = [30000, 50000, 70000, 100000]
 default_step_need_count = [4, 3, 2, 1]
 default_step_fee = [20000, 30000, 40000, 50000]
@@ -14,13 +15,23 @@ strength_fee = {
 
 # 강화가 어느 단계 까지 가능 한지
 # table(GRADE, STEP) = max strength.
-default_strength_max_table = [
-	[2, 2, 3, 3, 4],
-	[3, 3, 3, 4, 4],
-	[4, 4, 4, 4, 4],
-	[4, 4, 4, 4, 5],
-	[4, 4, 4, 5, 6],
+if app.ENABLE_DSS_GRADE_MYTH:
+	default_strength_max_table = [
+		[2, 2, 3, 3, 4],
+		[3, 3, 3, 4, 4],
+		[4, 4, 4, 4, 4],
+		[4, 4, 4, 4, 5],
+		[4, 4, 4, 5, 6],
+		[4, 4, 4, 5, 6],
 ]
+else:
+	default_strength_max_table = [
+		[2, 2, 3, 3, 4],
+		[3, 3, 3, 4, 4],
+		[4, 4, 4, 4, 4],
+		[4, 4, 4, 4, 5],
+		[4, 4, 4, 5, 6],
+	]
 
 # 일단 기획적으로는 strength 강화의 경우, 강화석에 의해 fee가 셋팅되기 때문에,
 # dragon_soul_refine_info에 넣지 않았다.

@@ -18,6 +18,11 @@ import constInfo
 import ime
 import uiInventory
 import sys
+
+if app.ENABLE_DSS_GRADE_MYTH:
+	import uiToolTip
+	import wndMgr
+
 ITEM_FLAG_APPLICABLE = 1 << 14
 
 # 용혼석 Vnum에 대한 comment	
@@ -29,6 +34,11 @@ ITEM_FLAG_APPLICABLE = 1 << 14
 class DragonSoulWindow(ui.ScriptWindow):
 	KIND_TAP_TITLES = [uiScriptLocale.DRAGONSOUL_TAP_TITLE_1, uiScriptLocale.DRAGONSOUL_TAP_TITLE_2,
 			uiScriptLocale.DRAGONSOUL_TAP_TITLE_3, uiScriptLocale.DRAGONSOUL_TAP_TITLE_4, uiScriptLocale.DRAGONSOUL_TAP_TITLE_5, uiScriptLocale.DRAGONSOUL_TAP_TITLE_6]
+	
+	if app.ENABLE_DSS_GRADE_MYTH:
+		KIND_PAGE_TITLES = [uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_1, uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_2, uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_3,
+		uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_4, uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_5, uiScriptLocale.DRAGONSOUL_PAGE_BUTTON_6]
+
 	def __init__(self):
 		ui.ScriptWindow.__init__(self)
 		self.questionDialog = None
@@ -43,6 +53,10 @@ class DragonSoulWindow(ui.ScriptWindow):
 		self.inventoryPageIndex = 0
 		self.SetWindowName("DragonSoulWindow")
 		self.__LoadWindow()
+
+		if app.ENABLE_DSS_GRADE_MYTH:
+			self.toolTip = uiToolTip.ToolTip()
+			self.toolTip.ClearToolTip()
 
 	def __del__(self):
 		ui.ScriptWindow.__del__(self)
@@ -99,6 +113,8 @@ class DragonSoulWindow(ui.ScriptWindow):
 			self.inventoryTab.append(self.GetChild("Inventory_Tab_03"))
 			self.inventoryTab.append(self.GetChild("Inventory_Tab_04"))
 			self.inventoryTab.append(self.GetChild("Inventory_Tab_05"))
+			if app.ENABLE_DSS_GRADE_MYTH:
+				self.inventoryTab.append(self.GetChild("Inventory_Tab_06"))
 			self.tabDict = {
 				0	: self.GetChild("Tab_01"),
 				1	: self.GetChild("Tab_02"),
@@ -137,19 +153,37 @@ class DragonSoulWindow(ui.ScriptWindow):
 		wndEquip.SetUseSlotEvent(ui.__mem_func__(self.UseEquipItemSlot))
 		wndEquip.SetOverInItemEvent(ui.__mem_func__(self.OverInEquipItem))
 		wndEquip.SetOverOutItemEvent(ui.__mem_func__(self.OverOutEquipItem))
-		
-		## Deck
-		self.deckTab[0].SetToggleDownEvent(lambda arg=0: self.SetDeckPage(arg))
-		self.deckTab[1].SetToggleDownEvent(lambda arg=1: self.SetDeckPage(arg))
-		self.deckTab[0].SetToggleUpEvent(lambda arg=0: self.__DeckButtonDown(arg))
-		self.deckTab[1].SetToggleUpEvent(lambda arg=1: self.__DeckButtonDown(arg))
-		self.deckTab[0].Down()
-		## Grade button
-		self.inventoryTab[0].SetEvent(lambda arg=0: self.SetInventoryPage(arg))
-		self.inventoryTab[1].SetEvent(lambda arg=1: self.SetInventoryPage(arg))
-		self.inventoryTab[2].SetEvent(lambda arg=2: self.SetInventoryPage(arg))
-		self.inventoryTab[3].SetEvent(lambda arg=3: self.SetInventoryPage(arg))
-		self.inventoryTab[4].SetEvent(lambda arg=4: self.SetInventoryPage(arg))
+
+		if app.ENABLE_DSS_GRADE_MYTH:
+			## Deck
+			self.deckTab[0].SetToggleDownEvent(ui.__mem_func__(self.SetDeckPage), 0)
+			self.deckTab[1].SetToggleDownEvent(ui.__mem_func__(self.SetDeckPage), 1)
+			self.deckTab[0].SetToggleUpEvent(ui.__mem_func__(self.__DeckButtonDown), 0)
+			self.deckTab[1].SetToggleUpEvent(ui.__mem_func__(self.__DeckButtonDown), 1)
+			self.deckTab[0].Down()
+			## Grade button
+			self.inventoryTab[0].SetEvent(ui.__mem_func__(self.SetInventoryPage),0)
+			self.inventoryTab[1].SetEvent(ui.__mem_func__(self.SetInventoryPage),1)
+			self.inventoryTab[2].SetEvent(ui.__mem_func__(self.SetInventoryPage),2)
+			self.inventoryTab[3].SetEvent(ui.__mem_func__(self.SetInventoryPage),3)
+			self.inventoryTab[4].SetEvent(ui.__mem_func__(self.SetInventoryPage),4)
+			self.inventoryTab[5].SetEvent(ui.__mem_func__(self.SetInventoryPage),5)
+			for i in range(6):
+				self.inventoryTab[i].ShowToolTip = lambda arg = DragonSoulWindow.KIND_PAGE_TITLES[i] : self.OverInToolTip(arg)
+				self.inventoryTab[i].HideToolTip = lambda : self.OverOutToolTip()
+		else:
+			## Deck
+			self.deckTab[0].SetToggleDownEvent(lambda arg=0: self.SetDeckPage(arg))
+			self.deckTab[1].SetToggleDownEvent(lambda arg=1: self.SetDeckPage(arg))
+			self.deckTab[0].SetToggleUpEvent(lambda arg=0: self.__DeckButtonDown(arg))
+			self.deckTab[1].SetToggleUpEvent(lambda arg=1: self.__DeckButtonDown(arg))
+			self.deckTab[0].Down()
+			## Grade button
+			self.inventoryTab[0].SetEvent(lambda arg=0: self.SetInventoryPage(arg))
+			self.inventoryTab[1].SetEvent(lambda arg=1: self.SetInventoryPage(arg))
+			self.inventoryTab[2].SetEvent(lambda arg=2: self.SetInventoryPage(arg))
+			self.inventoryTab[3].SetEvent(lambda arg=3: self.SetInventoryPage(arg))
+			self.inventoryTab[4].SetEvent(lambda arg=4: self.SetInventoryPage(arg))
 		self.inventoryTab[0].Down()
 		## Etc
 		self.wndItem = wndItem
@@ -201,10 +235,17 @@ class DragonSoulWindow(ui.ScriptWindow):
 		if self.inventoryPageIndex != page:
 			self.__HighlightSlot_ClearCurrentPage()
 		self.inventoryPageIndex = page
-		self.inventoryTab[(page+1)%5].SetUp()
-		self.inventoryTab[(page+2)%5].SetUp()
-		self.inventoryTab[(page+3)%5].SetUp()
-		self.inventoryTab[(page+4)%5].SetUp()
+		if app.ENABLE_DSS_GRADE_MYTH:
+			self.inventoryTab[(page+1)%6].SetUp()
+			self.inventoryTab[(page+2)%6].SetUp()
+			self.inventoryTab[(page+3)%6].SetUp()
+			self.inventoryTab[(page+4)%6].SetUp()
+			self.inventoryTab[(page+5)%6].SetUp()
+		else:
+			self.inventoryTab[(page+1)%5].SetUp()
+			self.inventoryTab[(page+2)%5].SetUp()
+			self.inventoryTab[(page+3)%5].SetUp()
+			self.inventoryTab[(page+4)%5].SetUp()
 		self.RefreshBagSlotWindow()
 		
 	def SetItemToolTip(self, tooltipItem):
@@ -248,8 +289,11 @@ class DragonSoulWindow(ui.ScriptWindow):
 	def __InventoryLocalSlotPosToGlobalSlotPos(self, window_type, local_slot_pos):
 		if player.INVENTORY == window_type:
 			return self.deckPageIndex * player.DRAGON_SOUL_EQUIPMENT_FIRST_SIZE + local_slot_pos
-			
-		return (self.DSKindIndex * 5 * player.DRAGON_SOUL_PAGE_SIZE) + self.inventoryPageIndex * player.DRAGON_SOUL_PAGE_SIZE + local_slot_pos
+
+		if app.ENABLE_DSS_GRADE_MYTH:
+			return (self.DSKindIndex * 6 * player.DRAGON_SOUL_PAGE_SIZE) + self.inventoryPageIndex * player.DRAGON_SOUL_PAGE_SIZE + local_slot_pos
+		else:		
+			return (self.DSKindIndex * 5 * player.DRAGON_SOUL_PAGE_SIZE) + self.inventoryPageIndex * player.DRAGON_SOUL_PAGE_SIZE + local_slot_pos
 		
 	def RefreshBagSlotWindow(self):
 		getItemVNum=player.GetItemIndex
@@ -732,6 +776,30 @@ class DragonSoulWindow(ui.ScriptWindow):
 		if app.ENABLE_DRAGON_SOUL_SYSTEM:
 			from _weakref import proxy
 			self.wndDragonSoulRefine = proxy(wndDragonSoulRefine)
+
+	if app.ENABLE_DSS_GRADE_MYTH:
+		def OverInToolTip(self, arg):
+			if self.toolTip:
+				arglen = len(str(arg))
+				pos_x, pos_y = wndMgr.GetMousePosition()
+
+				self.toolTip.ClearToolTip()
+				self.toolTip.SetThinBoardSize(11 * arglen)
+				self.toolTip.SetToolTipPosition(pos_x, pos_y - 30)
+				self.toolTip.AppendTextLine(arg)
+				self.toolTip.Show()
+
+		def OverOutToolTip(self):
+			if self.toolTip:
+				self.toolTip.Hide()
+
+		def ToolTipProgress(self):
+			if self.toolTip:
+				pos_x, pos_y = wndMgr.GetMousePosition()
+				self.toolTip.SetToolTipPosition(pos_x, pos_y - 30)
+
+		def OnUpdate(self):
+			self.ToolTipProgress()
 
 ## 강화할 수 없는 경우 날리는 예외
 #class DragonSoulRefineException(Exception):
